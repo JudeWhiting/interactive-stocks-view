@@ -268,3 +268,4 @@ if __name__ == "__main__":
 # sort out datetime global vars
 # make a slider for donchian channel
 # sort out sma and ema window vars and make sure the ema and sma sliders work
+# make checkbox work better
