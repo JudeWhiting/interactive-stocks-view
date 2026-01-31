@@ -8,5 +8,5 @@ def date_x_months_ago(today: datetime, months_ago: int, to_datetime: bool=False)
         return (today - relativedelta(months=months_ago)).strftime('%m-%Y')
 
 def get_api_key():
-    f = open("polygon-key.txt", "r")
+    f = open("apikey.txt", "r")
     return f.readline().strip()
