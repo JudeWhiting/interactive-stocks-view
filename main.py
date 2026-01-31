@@ -4,6 +4,7 @@ from massive import RESTClient
 import pandas as pd
 from datetime import datetime
 from utils import calculate_graph, misc
+from database import engine
 
 date_today = datetime.date(datetime.today())
 data_table: pd.DataFrame = pd.DataFrame()
@@ -187,4 +188,5 @@ def get_format_price(ticker: str) -> pd.DataFrame:
     return df
 
 if __name__ == "__main__":
+    engine.initialise_db()
     app.run(debug=True)
