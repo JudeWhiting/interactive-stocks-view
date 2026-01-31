@@ -1,15 +1,14 @@
 from dash import Dash, dcc, html, Input, Output, State
 import plotly.express as px
-import polygon
+from massive import RESTClient
 import pandas as pd
 from datetime import datetime
-
 from utils import calculate_graph, misc
 
 date_today = datetime.date(datetime.today())
 data_table: pd.DataFrame = pd.DataFrame()
 
-STOCKS_CLIENT: polygon.StocksClient = polygon.StocksClient(misc.get_polygon_key())
+CLIENT = RESTClient(misc.get_api_key())
 DEFAULT_TICKER: str = "AAPL"
 COLOR_MAP: dict = {"PRICE": "grey",}
 
@@ -171,26 +170,21 @@ def update_sma(sma_window: int, raw_data: str) -> str:
 
 
 def get_format_price(ticker: str) -> pd.DataFrame:
-    stocks = STOCKS_CLIENT.get_aggregate_bars(ticker, misc.date_x_months_ago(date_today, 24, True), date_today)
-    stocks = stocks["results"]
-    df = pd.DataFrame(stocks)
+    aggs = []
+    for a in CLIENT.list_aggs(
+            "AAPL",
+            1,
+            "day",
+            "2025-11-03",
+            "2025-11-28",
+            adjusted="true",
+            sort="asc",
+            limit=120,
+    ):
+        aggs.append(a)
+    df = pd.DataFrame(aggs)
     df["type"] = "PRICE"
-    # df["t"] = df["t"].apply(lambda unixtimestamp: datetime.date(datetime.fromtimestamp(unixtimestamp / 1000)))
     return df
 
 if __name__ == "__main__":
-    #dff = pd.read_json(dff, orient="records")
-
     app.run(debug=True)
-
-
-# figure optimal way to structure callbacks to plot multiple graphs of same stock
-# make new column which labels what plot the values belong to and then concat everything together
-# https://dash.plotly.com/basic-callbacks - for dash callbacks
-# https://plotly.com/python/plotly-fundamentals/ - for plotly graphing
-# https://polygon.readthedocs.io/en/latest/Stocks.html - for getting stock data
-# IMPORTANT TO DO
-# sort out datetime global vars
-# make a slider for donchian channel
-# sort out sma and ema window vars and make sure the ema and sma sliders work
-# make checkbox work better
