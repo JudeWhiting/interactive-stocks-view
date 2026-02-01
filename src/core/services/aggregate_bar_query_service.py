@@ -25,7 +25,7 @@ class AggregateBarQueryService:
             )
 
     @staticmethod
-    def transform_json(response, ticker):
+    def to_sqlmodel(response, ticker):
         return AggregateBar(
             ticker=ticker,
             datetime=datetime.utcfromtimestamp(response.timestamp / 1000),

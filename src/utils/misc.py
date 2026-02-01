@@ -1,7 +1,8 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
-def date_x_months_ago(today: datetime, months_ago: int, to_datetime: bool=False) -> datetime:
+def date_x_months_ago(months_ago: int, to_datetime: bool=False) -> datetime:
+    today = datetime.today()
     if to_datetime:
         return today - relativedelta(months=months_ago)
     else:
