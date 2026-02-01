@@ -20,7 +20,6 @@ COLOR_MAP: dict = {"PRICE": "grey",}
 
 
 @app.callback(
-    # Output("graph", "figure", allow_duplicate=True),
     Output("data-table", "data", allow_duplicate=True),
     Input("send-query-button", "n_clicks"),
     State("ticker-text-box", "value"),
@@ -56,7 +55,7 @@ def update_plot(graph_checklist: list, months_slider: int, raw_data) -> px.line:
 
 
 
-@app.callback( # might be a problem with getting and outputting the data table
+@app.callback(
     Output("data-table", "data", allow_duplicate=True),
     Input("donchian-slider", "value"),
     State("data-table", "data"),
