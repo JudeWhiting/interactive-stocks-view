@@ -4,6 +4,10 @@ from massive import RESTClient
 import pandas as pd
 from datetime import datetime
 from utils import calculate_graph, misc
+from core.db.engine import engine
+from core.services.aggregate_bar_query_service import AggregateBarQueryService
+from scripts import delete_all_db_data
+
 
 date_today = datetime.date(datetime.today())
 data_table: pd.DataFrame = pd.DataFrame()
@@ -11,6 +15,9 @@ data_table: pd.DataFrame = pd.DataFrame()
 CLIENT = RESTClient(misc.get_api_key())
 DEFAULT_TICKER: str = "AAPL"
 COLOR_MAP: dict = {"PRICE": "grey",}
+
+DATEFROM = "2025-11-03"
+DATETO = "2025-11-28"
 
 
 
@@ -95,13 +102,13 @@ def get_data(_, ticker: str, graph_checklist: list, sma_window: int, donchian_wi
     # data_table = pd.DataFrame()
 
     ticker = ticker.upper().strip()
-    price = get_format_price(ticker)
-    donchian = calculate_graph.donchian_channel(price, donchian_window)
-    sma = calculate_graph.simple_moving_average(price, sma_window)
+    get_format_price(ticker)
+    #donchian = calculate_graph.donchian_channel(price, donchian_window)
+    #sma = calculate_graph.simple_moving_average(price, sma_window)
     # data_table = pd.concat([price, donchian, sma])
-    df = pd.concat([price, donchian, sma])
+    #df = pd.concat([price, donchian, sma])
     # return update_plot(graph_checklist, months_slider)
-    return df.to_json(orient="records")
+    return AggregateBarQueryService.read_by_date(DATEFROM, DATETO)
 
 
 @app.callback(
@@ -111,7 +118,8 @@ def get_data(_, ticker: str, graph_checklist: list, sma_window: int, donchian_wi
     Input("data-table", "data"),
     prevent_initial_call=True
 )
-def update_plot(graph_checklist: list, months_slider: int, raw_data: str) -> px.line:
+def update_plot(graph_checklist: list, months_slider: int, raw_data) -> px.line:
+    """
     months_slider = 25 - months_slider
     df = pd.read_json(raw_data, orient="records")
 
@@ -130,11 +138,11 @@ def update_plot(graph_checklist: list, months_slider: int, raw_data: str) -> px.
     plot_data["t"] = plot_data["t"].apply(lambda unixtimestamp: datetime.date(datetime.fromtimestamp(unixtimestamp / 1000)))
 
     plot_data = plot_data[plot_data["t"] >= misc.date_x_months_ago(date_today, months_slider, to_datetime=True)]
-
+    """
     fig = px.line(
-        plot_data, x="t", y="c", title="Stock Data", color_discrete_map=COLOR_MAP,
-        color="type",
-        labels={"t": "Date", "c": "Value", "type": "Legend"},
+        raw_data, x="datetime", y="close", title="Stock Data", color_discrete_map=COLOR_MAP,
+        #color="type",
+        #labels={"t": "Date", "c": "Value", "type": "Legend"},
     )
     fig.update_layout(yaxis_tickformat="$")
 
@@ -169,22 +177,22 @@ def update_sma(sma_window: int, raw_data: str) -> str:
     return mydata.to_json(orient="records")
 
 
-def get_format_price(ticker: str) -> pd.DataFrame:
+def get_format_price(ticker: str):
     aggs = []
+
     for a in CLIENT.list_aggs(
-            "AAPL",
+            ticker,
             1,
             "day",
-            "2025-11-03",
-            "2025-11-28",
+            DATEFROM,
+            DATETO,
             adjusted="true",
             sort="asc",
             limit=120,
     ):
-        aggs.append(a)
-    df = pd.DataFrame(aggs)
-    df["type"] = "PRICE"
-    return df
+        my_row = AggregateBarQueryService.transform_json(a, ticker)
+        AggregateBarQueryService.insert_row(my_row)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

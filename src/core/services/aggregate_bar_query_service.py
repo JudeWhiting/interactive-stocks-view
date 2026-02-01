@@ -1,0 +1,48 @@
+from sqlmodel import Session, text, select
+from core.db.engine import engine
+from core.db.models import AggregateBar
+from datetime import datetime
+
+class AggregateBarQueryService:
+    @staticmethod
+    def insert_row(row):
+        with Session(engine) as session:
+            session.add(row)
+            session.commit()
+            session.refresh(row)
+            return row
+
+    @staticmethod
+    def read_all():
+        with Session(engine) as session:
+            return session.exec(text("SELECT * FROM aggregate_bar")).all()
+
+    @staticmethod
+    def delete_all():
+        with (Session(engine) as session):
+            session.exec(text("DELETE FROM aggregate_bar"))
+            session.commit(
+            )
+
+    @staticmethod
+    def transform_json(response, ticker):
+        return AggregateBar(
+            ticker=ticker,
+            datetime=datetime.utcfromtimestamp(response.timestamp / 1000),
+            volume=response.volume,
+            open=response.open,
+            high=response.high,
+            low=response.low,
+            close=response.close,
+            volume_weighted_average_price=response.vwap
+        )
+
+    @staticmethod
+    def read_by_date(date_from, date_to):
+        with Session(engine) as session:
+            vals = session.exec(
+                    select(AggregateBar).where(
+                    (AggregateBar.datetime > date_from) &
+                    (AggregateBar.datetime < date_to)
+            ).order_by(AggregateBar.datetime))
+            return [bar.model_dump() for bar in vals]
