@@ -1,8 +1,12 @@
 from massive import RESTClient
-from utils import misc
-from core.services.aggregate_bar_query_service import AggregateBarQueryService
+from db.query.aggregate_bar_query_service import AggregateBarQueryService
 
-CLIENT = RESTClient(misc.get_api_key())
+
+def get_api_key():
+    f = open("src/api/apikey.txt", "r")
+    return f.readline().strip()
+
+CLIENT = RESTClient(get_api_key())
 
 DATEFROM = "2025-11-03"
 DATETO = "2025-11-28"

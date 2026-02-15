@@ -1,5 +1,13 @@
 from dash import Dash, dcc, html
-from utils import misc
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+def date_x_months_ago(months_ago: int, to_datetime: bool=False) -> datetime:
+    today = datetime.today()
+    if to_datetime:
+        return today - relativedelta(months=months_ago)
+    else:
+        return (today - relativedelta(months=months_ago)).strftime('%m-%Y')
 
 app = Dash(__name__)
 app.layout = html.Div([
@@ -53,10 +61,10 @@ app.layout = html.Div([
             step=1,
             value=0,
             marks={
-                0: misc.date_x_months_ago(24),
-                6: misc.date_x_months_ago(18),
-                12: misc.date_x_months_ago(12),
-                18: misc.date_x_months_ago(6),
+                0: date_x_months_ago(24),
+                6: date_x_months_ago(18),
+                12: date_x_months_ago(12),
+                18: date_x_months_ago(6),
                 24: "This Month",
             },
         ),

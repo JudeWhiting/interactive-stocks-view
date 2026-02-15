@@ -1,12 +1,8 @@
-from dash import Dash, dcc, html, Input, Output, State
+from dash import Input, Output, State
 import plotly.express as px
-from core.services.aggregate_bar_query_service import AggregateBarQueryService
+from db.query.aggregate_bar_query_service import AggregateBarQueryService
 from layout import *
 from api import api
-
-from scripts import delete_all_db_data
-
-
 
 DATEFROM = "2025-11-03"
 DATETO = "2025-11-28"
@@ -88,4 +84,5 @@ def update_sma(sma_window: int, raw_data: str) -> str:
 
 
 if __name__ == "__main__":
+    AggregateBarQueryService.delete_all()
     app.run(debug=True)
