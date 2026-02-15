@@ -38,11 +38,17 @@ class AggregateBarQueryService:
         )
 
     @staticmethod
-    def read_by_date(date_from, date_to):
+    def read_by_ticker(ticker):
         with Session(engine) as session:
             vals = session.exec(
                     select(AggregateBar).where(
-                    (AggregateBar.datetime > date_from) &
-                    (AggregateBar.datetime < date_to)
+                    AggregateBar.ticker == ticker
             ).order_by(AggregateBar.datetime))
             return [bar.model_dump() for bar in vals]
+
+    @staticmethod
+    def is_missing_data(ticker):
+        with Session(engine) as session:
+            statement = select(AggregateBar).where(AggregateBar.ticker == ticker).limit(1)
+            result = session.exec(statement).first()
+            return result == None

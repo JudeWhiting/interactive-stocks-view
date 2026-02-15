@@ -21,7 +21,7 @@ app.layout = html.Div([
     html.Div(
         dcc.Checklist(
             ["Simple Moving Average", "Donchian Channel"],
-            ["Simple Moving Average", "Donchian Channel"],
+            [],
             id="checklist",
         ),
     ),
@@ -56,16 +56,16 @@ app.layout = html.Div([
     html.Div(
         dcc.Slider(
             id="date-slider",
-            min=0,
-            max=24,
+            min=1,
+            max=12,
             step=1,
-            value=0,
+            value=12,
             marks={
-                0: date_x_months_ago(24),
-                6: date_x_months_ago(18),
+                1: "This Month",
+                3: date_x_months_ago(3),
+                6: date_x_months_ago(6),
+                9: date_x_months_ago(9),
                 12: date_x_months_ago(12),
-                18: date_x_months_ago(6),
-                24: "This Month",
             },
         ),
         style={"width": "50%"},
