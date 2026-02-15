@@ -8,8 +8,12 @@ def get_api_key():
 
 CLIENT = RESTClient(get_api_key())
 
-DATEFROM = "2025-11-03"
-DATETO = "2025-11-28"
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
+DATETO = date.today()
+DATEFROM = DATETO - relativedelta(years=1)
+
 
 def get_format_price(ticker: str):
     aggs = []

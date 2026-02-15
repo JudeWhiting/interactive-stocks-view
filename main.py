@@ -1,11 +1,15 @@
 from dash import Input, Output, State
 import plotly.express as px
+import plotly.graph_objs as go
 from db.query.aggregate_bar_query_service import AggregateBarQueryService
 from layout import *
 from api import api
+from services import calculate_graph
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
-DATEFROM = "2025-11-03"
-DATETO = "2025-11-28"
+DATETO = date.today()
+DATEFROM = DATETO - relativedelta(years=1)
 
 COLOR_MAP: dict = {"PRICE": "grey",}
 
@@ -39,12 +43,18 @@ def get_data(_, ticker: str, graph_checklist: list, sma_window: int, donchian_wi
     Input("data-table", "data"),
     prevent_initial_call=True
 )
-def update_plot(graph_checklist: list, months_slider: int, raw_data) -> px.line:
-    fig = px.line(
-        raw_data, x="datetime", y="close", title="Stock Data", color_discrete_map=COLOR_MAP,
-        #color="type",
-        #labels={"t": "Date", "c": "Value", "type": "Legend"},
-    )
+def update_plot(graph_checklist: list, months_slider: int, raw_data):
+    fig = go.Figure()
+    donchian = calculate_graph.donchian_channel(raw_data, 50)
+    sma = calculate_graph.simple_moving_average(raw_data, 50)
+
+    fig.add_trace(go.Scatter(x=[item["datetime"] for item in raw_data], y=[item["close"] for item in raw_data], mode="lines", name="price"))
+    fig.add_trace(go.Scatter(x=[item["datetime"] for item in raw_data], y=donchian["max"], mode="lines", name="donchian_max"))
+    fig.add_trace(go.Scatter(x=[item["datetime"] for item in raw_data], y=donchian["min"], mode="lines", name="donchian_min"))
+    fig.add_trace(go.Scatter(x=[item["datetime"] for item in raw_data], y=donchian["avg"], mode="lines", name="donchian_avg"))
+    fig.add_trace(go.Scatter(x=[item["datetime"] for item in raw_data], y=sma, mode="lines", name="sma"))
+
+
     fig.update_layout(yaxis_tickformat="$")
 
     return fig

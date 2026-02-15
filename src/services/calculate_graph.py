@@ -6,11 +6,13 @@ def donchian_channel(raw_data: list, window_size: int):
     max_vals = []
     min_vals = []
     avg_vals = []
-    dates = []
 
     for row in raw_data:
         last_n_values.append(row["close"])
-        dates.append(row["datetime"])
+
+        if len(last_n_values) < window_size:
+            continue
+
         max_val = max(last_n_values)
         min_val = min(last_n_values)
         avg_val = (max_val + min_val) / 2
@@ -19,31 +21,21 @@ def donchian_channel(raw_data: list, window_size: int):
         min_vals.append(min_val)
         avg_vals.append(avg_val)
 
-    donchian_max = pd.DataFrame({"t": dates, "c": max_vals, "type": "Donchian Upper" })
-    donchian_min = pd.DataFrame({"t": dates, "c": min_vals, "type": "Donchian Lower" })
-    donchian_avg = pd.DataFrame({"t": dates, "c": avg_vals, "type": "Donchian Avg"})
-    return pd.concat([donchian_max, donchian_min, donchian_avg])
+    return {"max" : [None] * (window_size-1) + max_vals, "min" : [None] * (window_size-1) + min_vals, "avg" : [None] * (window_size-1) + avg_vals}
 
-def simple_moving_average(df: pd.DataFrame, window_size: int) -> pd.DataFrame:
+def simple_moving_average(raw_data, window_size: int):
     last_n_values = deque(maxlen=window_size)
     sma_vals = []
-    dates = []
 
-    df = df[df["type"] == "PRICE"]
-    if df.iloc[-1]["t"] < df.iloc[0]["t"]:
-        # checks if the dates are the right way around (earlier dates should be at top of df)
-        df = df[::-1]
-
-    for row in df.index:
-        last_n_values.append(df.at[row, "c"])
+    for row in raw_data:
+        last_n_values.append(row["close"])
 
         if len(last_n_values) < window_size:
             continue
 
-        dates.append(df.at[row,"t"])
         sma_vals.append(sum(last_n_values) / window_size)
 
-    return pd.DataFrame({"t": dates, "c": sma_vals, "type": "Simple Moving Average"})
+    return [None] * (window_size-1) + sma_vals
 
 
 # both functions need to take into account non market days
