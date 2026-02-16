@@ -8,25 +8,22 @@ def get_api_key():
 
 CLIENT = RESTClient(get_api_key())
 
-from datetime import date
-from dateutil.relativedelta import relativedelta
 
-DATETO = date.today()
-DATEFROM = DATETO - relativedelta(years=1)
-
-
-def get_format_price(ticker: str):
+def get_format_price(ticker, date_from, date_to):
     aggs = []
 
-    for a in CLIENT.list_aggs(
-            ticker,
-            1,
-            "day",
-            DATEFROM,
-            DATETO,
-            adjusted="true",
-            sort="asc",
-            limit=120,
-    ):
-        my_row = AggregateBarQueryService.to_sqlmodel(a, ticker)
-        AggregateBarQueryService.insert_row(my_row)
+    try:
+        for a in CLIENT.list_aggs(
+                ticker,
+                1,
+                "day",
+                date_from,
+                date_to,
+                adjusted="true",
+                sort="asc",
+                limit=120,
+        ):
+            my_row = AggregateBarQueryService.to_sqlmodel(a, ticker)
+            AggregateBarQueryService.insert_row(my_row)
+    except Exception as e:
+        print(e)

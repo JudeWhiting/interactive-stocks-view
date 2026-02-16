@@ -12,7 +12,7 @@ def date_x_months_ago(months_ago: int, to_datetime: bool=False) -> datetime:
 app = Dash(__name__)
 app.layout = html.Div([
 
-    html.Div(dcc.Input(id="ticker-text-box", type="text", placeholder="Enter Ticker ID")),
+    html.Div(dcc.Input(id="ticker-text-box", type="text", placeholder="Enter Ticker ID", value="")),
 
     html.Button(id="send-query-button", n_clicks=0, children="Send Query"),
 
@@ -62,10 +62,10 @@ app.layout = html.Div([
             value=12,
             marks={
                 1: "This Month",
-                3: date_x_months_ago(3),
-                6: date_x_months_ago(6),
-                9: date_x_months_ago(9),
-                12: date_x_months_ago(12),
+                3: "Three Months",
+                6: "Half-Year",
+                9: "Nine Months",
+                12: "This Year",
             },
         ),
         style={"width": "50%"},

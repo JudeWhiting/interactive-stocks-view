@@ -52,3 +52,16 @@ class AggregateBarQueryService:
             statement = select(AggregateBar).where(AggregateBar.ticker == ticker).limit(1)
             result = session.exec(statement).first()
             return result == None
+
+    @staticmethod
+    def most_recent(ticker):
+        with Session(engine) as session:
+            result = session.exec(
+                select(AggregateBar.datetime).where(
+                    AggregateBar.ticker == ticker
+                ).order_by(AggregateBar.datetime.desc())
+                .limit(1)
+            ).first()
+            return result
+
+
