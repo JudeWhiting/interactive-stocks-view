@@ -11,23 +11,15 @@ from dateutil.relativedelta import relativedelta
 DATETO = date.today()
 DATEFROM = DATETO - relativedelta(years=1)
 
-COLOR_MAP: dict = {"PRICE": "grey",}
-
-
-
-
-
-
-
 @app.callback(
     Output("data-table", "data", allow_duplicate=True),
     Input("send-query-button", "n_clicks"),
     State("ticker-text-box", "value"),
-    prevent_initial_call=True
-)
+    prevent_initial_call=True)
 def get_data(_, ticker):
     ticker = ticker.upper().strip()
-    if AggregateBarQueryService.is_missing_data(ticker):
+
+    if AggregateBarQueryService.is_missing_ticker(ticker):
         api.get_format_price(ticker, DATEFROM, DATETO)
     elif date.fromisoformat(AggregateBarQueryService.most_recent(ticker).split(" ")[0]) > DATETO:
         api.get_format_price(ticker, date.fromisoformat(AggregateBarQueryService.most_recent(ticker).split(" ")[0]) + relativedelta(days=1), DATETO)
@@ -43,8 +35,7 @@ def get_data(_, ticker):
     Input("checklist", "value"),
     Input("sma-slider", "value"),
     Input("donchian-slider", "value"),
-    Input("data-table", "data")
-)
+    Input("data-table", "data"))
 def update_plot(graph_checklist: list, months_slider: int, checklist, sma_window, donchian_window, raw_data):
     fig = go.Figure()
 
@@ -63,17 +54,9 @@ def update_plot(graph_checklist: list, months_slider: int, checklist, sma_window
         fig.add_trace(go.Scatter(x=dates, y=donchian["avg"][-len(dates):], mode="lines", name="donchian_avg", line={"color": "orange"}))
         fig.add_trace(go.Scatter(x=dates, y=donchian["min"][-len(dates):], mode="lines", name="donchian_min", line={"color": "red"}))
 
-
-
     fig.update_layout(yaxis_tickformat="$")
-
     return fig
 
 
-
-
-
-
 if __name__ == "__main__":
-    #AggregateBarQueryService.delete_all()
     app.run(debug=True)

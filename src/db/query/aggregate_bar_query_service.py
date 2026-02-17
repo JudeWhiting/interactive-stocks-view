@@ -3,7 +3,9 @@ from db.engine import engine
 from db.models import AggregateBar
 from datetime import datetime
 
+
 class AggregateBarQueryService:
+
     @staticmethod
     def insert_row(row):
         with Session(engine) as session:
@@ -47,7 +49,7 @@ class AggregateBarQueryService:
             return [bar.model_dump() for bar in vals]
 
     @staticmethod
-    def is_missing_data(ticker):
+    def is_missing_ticker(ticker):
         with Session(engine) as session:
             statement = select(AggregateBar).where(AggregateBar.ticker == ticker).limit(1)
             result = session.exec(statement).first()
