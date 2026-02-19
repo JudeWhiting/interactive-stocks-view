@@ -2,14 +2,14 @@ from dash import Input, Output, State
 import plotly.express as px
 import plotly.graph_objs as go
 from db.query.aggregate_bar_query_service import AggregateBarQueryService
+from db import engine
 from layout import *
 from api import api
 from services import calculate_graph
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-DATETO = date.today()
-DATEFROM = DATETO - relativedelta(years=1)
+
 
 @app.callback(
     Output("data-table", "data", allow_duplicate=True),
@@ -19,12 +19,12 @@ DATEFROM = DATETO - relativedelta(years=1)
 def get_data(_, ticker):
     ticker = ticker.upper().strip()
 
-    if AggregateBarQueryService.is_missing_ticker(ticker):
-        api.get_format_price(ticker, DATEFROM, DATETO)
-    elif date.fromisoformat(AggregateBarQueryService.most_recent(ticker).split(" ")[0]) > DATETO:
-        api.get_format_price(ticker, date.fromisoformat(AggregateBarQueryService.most_recent(ticker).split(" ")[0]) + relativedelta(days=1), DATETO)
+    if AggregateBarQueryService.is_missing_ticker(engine, ticker):
+        api.get_format_price(engine, ticker, DATEFROM, DATETO)
+    elif date.fromisoformat(AggregateBarQueryService.most_recent(engine, ticker).split(" ")[0]) > DATETO:
+        api.get_format_price(engine, ticker, date.fromisoformat(AggregateBarQueryService.most_recent(engine, ticker).split(" ")[0]) + relativedelta(days=1), DATETO)
 
-    return AggregateBarQueryService.read_by_ticker(ticker)
+    return AggregateBarQueryService.read_by_ticker(engine, ticker)
 
 
 
@@ -59,4 +59,7 @@ def update_plot(graph_checklist: list, months_slider: int, checklist, sma_window
 
 
 if __name__ == "__main__":
+    DATETO = date.today()
+    DATEFROM = DATETO - relativedelta(years=1)
+    engine = engine.get_engine()
     app.run(debug=True)

@@ -7,7 +7,7 @@ def get_api_key():
     return f.readline().strip()
 
 
-def get_format_price(ticker, date_from, date_to):
+def get_format_price(engine, ticker, date_from, date_to):
     client = RESTClient(get_api_key())
     aggs = []
 
@@ -23,7 +23,7 @@ def get_format_price(ticker, date_from, date_to):
             limit=120
         ):
             my_row = AggregateBarQueryService.to_sqlmodel(a, ticker)
-            AggregateBarQueryService.insert_row(my_row)
+            AggregateBarQueryService.insert_row(engine, my_row)
 
     except Exception as e:
         print(e)

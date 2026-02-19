@@ -33,7 +33,7 @@ httpcore==1.0.7
 httpx==0.28.1
 idna==3.10
 importlib_metadata==8.6.1
--e git+https://github.com/JudeWhiting/interactive-stocks-view.git@b31055e29997c2aeb6c02a8c09adcdefb93c88d4#egg=interactive_stocks_view
+-e git+https://github.com/JudeWhiting/interactive-stocks-view.git@78a5af88cc4384c3a56e1d8e311f3108db6c45f1#egg=interactive_stocks_view
 ipykernel==6.29.5
 ipython==9.0.2
 ipython_pygments_lexers==1.1.1
